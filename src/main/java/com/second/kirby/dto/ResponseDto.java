@@ -7,12 +7,12 @@ import java.time.LocalDateTime;
 @Getter
 public class ResponseDto<T> {
 
-    private final LocalDateTime timestamp;
+    private final LocalDateTime timeStamp;
     private final String message;
-    private final ResponseData<T> data;
+    private final T data;
 
-    public ResponseDto(LocalDateTime timestamp, String message, ResponseData<T> data) {
-        this.timestamp = timestamp;
+    public ResponseDto(LocalDateTime timeStamp, String message, T data) {
+        this.timeStamp = timeStamp;
         this.message = message;
         this.data = data;
     }
@@ -21,11 +21,11 @@ public class ResponseDto<T> {
         return new ResponseDto<>(LocalDateTime.now(), message, null);
     }
 
-    public static <T> ResponseDto<T> of(T body) {
-        return new ResponseDto<>(LocalDateTime.now(), null, new DefaultResponseData<>(body));
+    public static <T> ResponseDto<T> of(T data) {
+        return new ResponseDto<>(LocalDateTime.now(), null, data);
     }
 
-    public static <T> ResponseDto<T> of(T body, String message) {
-        return new ResponseDto<>(LocalDateTime.now(), message, new DefaultResponseData<>(body));
+    public static <T> ResponseDto<T> of(T data, String message) {
+        return new ResponseDto<>(LocalDateTime.now(), message, data);
     }
 }
