@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
-public class UserContoller {
+public class UserController {
 
     private final UserService userService;
 
@@ -35,7 +35,7 @@ public class UserContoller {
                 user.getPhoneNumber()
         );
 
-        return ResponseEntity.ok(ResponseDto.of(userInfo, "사용자 정보 조회 성공"));
+        return ResponseEntity.ok(ResponseDto.success(userInfo, "사용자 정보 조회 성공"));
     }
 
     // 사용자 정보 응답 DTO
@@ -45,5 +45,6 @@ public class UserContoller {
             String name,
             String email,
             String phoneNumber
-    ) {}
+    ) {
+    }
 }

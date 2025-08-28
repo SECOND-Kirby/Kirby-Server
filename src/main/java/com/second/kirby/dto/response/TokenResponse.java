@@ -1,4 +1,4 @@
-package com.second.kirby.dto;
+package com.second.kirby.dto.response;
 
 public record TokenResponse(
         String accessToken,
