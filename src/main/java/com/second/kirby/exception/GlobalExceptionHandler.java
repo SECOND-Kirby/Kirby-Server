@@ -1,11 +1,15 @@
 package com.second.kirby.exception;
 
+import com.second.kirby.dto.ResponseDto;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,69 +19,77 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
+    public ResponseEntity<ResponseDto<Object>> handleBusinessException(BusinessException e) {
         log.error("BusinessException: {}", e.getMessage());
-        ErrorCode errorCode = e.getErrorCode();
-        ErrorResponse response = new ErrorResponse(
-                errorCode.getStatus().value(),
-                errorCode.getStatus().getReasonPhrase(),
-                e.getMessage()
-        );
-        return ResponseEntity.status(errorCode.getStatus()).body(response);
+
+        ResponseDto<Object> response = ResponseDto.of(e.getResponseCode());
+
+        if (isRobotApi()) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(e.getResponseCode().getStatus()).body(response);
+        }
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException e) {
-        log.error("MethodArgumentNotValidException: {}", e.getMessage());
-        List<ErrorResponse.FieldError> fieldErrors = e.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(error -> new ErrorResponse.FieldError(
-                        error.getField(),
-                        error.getRejectedValue(),
-                        error.getDefaultMessage()
-                ))
-                .collect(Collectors.toList());
+    @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})
+    public ResponseEntity<ResponseDto<List<FieldError>>> handleValidationException(Exception e) {
+        log.error("Validation exception: {}", e.getMessage());
 
-        ErrorResponse response = new ErrorResponse(
-                400,
-                "Bad Request",
+        List<FieldError> fieldErrors = extractFieldErrors(e);
+        ResponseDto<List<FieldError>> response = ResponseDto.of(
+                ResponseCode.INVALID_INPUT_VALUE,
                 "입력값 검증에 실패했습니다.",
                 fieldErrors
         );
-        return ResponseEntity.badRequest().body(response);
-    }
 
-    @ExceptionHandler(BindException.class)
-    public ResponseEntity<ErrorResponse> handleBindException(BindException e) {
-        log.error("BindException: {}", e.getMessage());
-        List<ErrorResponse.FieldError> fieldErrors = e.getBindingResult()
-                .getFieldErrors()
-                .stream()
-                .map(error -> new ErrorResponse.FieldError(
-                        error.getField(),
-                        error.getRejectedValue(),
-                        error.getDefaultMessage()
-                ))
-                .collect(Collectors.toList());
-
-        ErrorResponse response = new ErrorResponse(
-                400,
-                "Bad Request",
-                "입력값 검증에 실패했습니다.",
-                fieldErrors
-        );
-        return ResponseEntity.badRequest().body(response);
+        if (isRobotApi()) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.badRequest().body(response);
+        }
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleException(Exception e) {
+    public ResponseEntity<ResponseDto<Object>> handleException(Exception e) {
         log.error("Unexpected exception: ", e);
-        ErrorResponse response = new ErrorResponse(
-                500,
-                "Internal Server Error",
-                "서버 내부 오류가 발생했습니다."
-        );
-        return ResponseEntity.internalServerError().body(response);
+
+        ResponseDto<Object> response = ResponseDto.of(ResponseCode.INTERNAL_SERVER_ERROR);
+
+        if (isRobotApi()) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    // 유틸리티 메서드들
+    private boolean isRobotApi() {
+        try {
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attributes != null) {
+                HttpServletRequest request = attributes.getRequest();
+                String path = request.getRequestURI();
+                return path.startsWith("/api/robot/") || path.startsWith("/ws/");
+            }
+        } catch (Exception e) {
+            log.warn("Failed to determine request context", e);
+        }
+        return false;
+    }
+
+    private List<FieldError> extractFieldErrors(Exception e) {
+        if (e instanceof MethodArgumentNotValidException validException) {
+            return validException.getBindingResult().getFieldErrors().stream()
+                    .map(error -> new FieldError(error.getField(), error.getRejectedValue(), error.getDefaultMessage()))
+                    .collect(Collectors.toList());
+        } else if (e instanceof BindException bindException) {
+            return bindException.getBindingResult().getFieldErrors().stream()
+                    .map(error -> new FieldError(error.getField(), error.getRejectedValue(), error.getDefaultMessage()))
+                    .collect(Collectors.toList());
+        }
+        return List.of();
+    }
+
+    public record FieldError(String field, Object rejectedValue, String message) {
     }
 }
