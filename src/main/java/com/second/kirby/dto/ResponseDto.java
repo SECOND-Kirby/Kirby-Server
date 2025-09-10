@@ -1,64 +1,39 @@
 package com.second.kirby.dto;
 
 import com.second.kirby.exception.ResponseCode;
-import lombok.Getter;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.time.LocalDateTime;
+@Schema(description = "공통 응답 형식")
+public record ResponseDto<T>(
+        @Schema(description = "성공 여부")
+        boolean success,
 
-@Getter
-public class ResponseDto<T> {
-    private final boolean success;
-    private final String code;
-    private final String message;
-    private final T data;
-    private final LocalDateTime timestamp;
+        @Schema(description = "응답 코드")
+        String code,
 
-    private ResponseDto(boolean success, String code, String message, T data) {
-        this.success = success;
-        this.code = code;
-        this.message = message;
-        this.data = data;
-        this.timestamp = LocalDateTime.now();
-    }
+        @Schema(description = "응답 메시지")
+        String message,
 
-    // ResponseCode를 사용한 생성
-    public static <T> ResponseDto<T> of(ResponseCode responseCode) {
-        return new ResponseDto<>(
-                responseCode == ResponseCode.SUCCESS,
-                responseCode.getCode(),
-                responseCode.getMessage(),
-                null
-        );
-    }
-
-    public static <T> ResponseDto<T> of(ResponseCode responseCode, T data) {
-        return new ResponseDto<>(
-                responseCode == ResponseCode.SUCCESS,
-                responseCode.getCode(),
-                responseCode.getMessage(),
-                data
-        );
-    }
-
-    public static <T> ResponseDto<T> of(ResponseCode responseCode, String customMessage, T data) {
-        return new ResponseDto<>(
-                responseCode == ResponseCode.SUCCESS,
-                responseCode.getCode(),
-                customMessage,
-                data
-        );
-    }
-
-    // 빠른 성공 응답
+        @Schema(description = "응답 데이터")
+        T data
+) {
+    // 성공 응답 (데이터 있음)
     public static <T> ResponseDto<T> success(T data, String message) {
-        return new ResponseDto<>(true, ResponseCode.SUCCESS.getCode(), message, data);
+        return new ResponseDto<>(true, "S001", message, data);
     }
 
-    public static <T> ResponseDto<T> success(String message) {
-        return new ResponseDto<>(true, ResponseCode.SUCCESS.getCode(), message, null);
+    // 성공 응답 (데이터 없음)
+    public static ResponseDto<Void> success(String message) {
+        return new ResponseDto<>(true, "S001", message, null);
     }
 
-    public static <T> ResponseDto<T> success(T data) {
-        return new ResponseDto<>(true, ResponseCode.SUCCESS.getCode(), ResponseCode.SUCCESS.getMessage(), data);
+    // 실패 응답 (데이터 있음)
+    public static <T> ResponseDto<T> error(ResponseCode responseCode, String message, T data) {
+        return new ResponseDto<>(false, responseCode.getCode(), message, data);
+    }
+
+    // 실패 응답 (데이터 없음)
+    public static ResponseDto<Void> error(ResponseCode responseCode, String message) {
+        return new ResponseDto<>(false, responseCode.getCode(), message, null);
     }
 }
