@@ -1,11 +1,11 @@
 package com.second.kirby.service;
 
 import com.second.kirby.domain.User;
-import com.second.kirby.dto.LoginRequest;
-import com.second.kirby.dto.SignupRequest;
-import com.second.kirby.dto.TokenResponse;
+import com.second.kirby.dto.request.LoginRequest;
+import com.second.kirby.dto.request.SignupRequest;
+import com.second.kirby.dto.response.TokenResponse;
 import com.second.kirby.exception.BusinessException;
-import com.second.kirby.exception.ErrorCode;
+import com.second.kirby.exception.ResponseCode;
 import com.second.kirby.repository.UserRepository;
 import com.second.kirby.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +37,7 @@ public class AuthService implements UserDetailsService {
 
         // 비밀번호 확인 검증
         if (!request.password().equals(request.passwordConfirm())) {
-            throw new BusinessException(ErrorCode.PASSWORD_MISMATCH);
+            throw new BusinessException(ResponseCode.PASSWORD_MISMATCH);
         }
 
         // 중복 검증
@@ -63,11 +63,11 @@ public class AuthService implements UserDetailsService {
 
         // 사용자 조회
         User user = userRepository.findByUsername(request.username())
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ResponseCode.USER_NOT_FOUND));
 
         // 비밀번호 검증
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new BusinessException(ErrorCode.INVALID_PASSWORD);
+            throw new BusinessException(ResponseCode.INVALID_PASSWORD);
         }
 
         // 토큰 생성
@@ -97,15 +97,15 @@ public class AuthService implements UserDetailsService {
 
     private void validateDuplication(String username, String email, String phoneNumber) {
         if (userRepository.existsByUsername(username)) {
-            throw new BusinessException(ErrorCode.USERNAME_ALREADY_EXISTS);
+            throw new BusinessException(ResponseCode.USERNAME_ALREADY_EXISTS);
         }
 
         if (userRepository.existsByEmail(email)) {
-            throw new BusinessException(ErrorCode.EMAIL_ALREADY_EXISTS);
+            throw new BusinessException(ResponseCode.EMAIL_ALREADY_EXISTS);
         }
 
         if (userRepository.existsByPhoneNumber(phoneNumber)) {
-            throw new BusinessException(ErrorCode.PHONE_NUMBER_ALREADY_EXISTS);
+            throw new BusinessException(ResponseCode.PHONE_NUMBER_ALREADY_EXISTS);
         }
     }
 }

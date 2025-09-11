@@ -1,9 +1,9 @@
 package com.second.kirby.controller;
 
-import com.second.kirby.dto.LoginRequest;
+import com.second.kirby.dto.request.LoginRequest;
 import com.second.kirby.dto.ResponseDto;
-import com.second.kirby.dto.SignupRequest;
-import com.second.kirby.dto.TokenResponse;
+import com.second.kirby.dto.request.SignupRequest;
+import com.second.kirby.dto.response.TokenResponse;
 import com.second.kirby.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,13 +29,13 @@ public class AuthController {
     public ResponseEntity<ResponseDto<Void>> signup(@Valid @RequestBody SignupRequest request) {
         authService.signup(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ResponseDto.of("회원가입이 완료되었습니다."));
+                .body(ResponseDto.success("회원가입이 완료되었습니다."));
     }
 
     @Operation(summary = "로그인", description = "사용자 인증을 수행하고 토큰을 발급합니다.")
     @PostMapping("/login")
     public ResponseEntity<ResponseDto<TokenResponse>> login(@Valid @RequestBody LoginRequest request) {
         TokenResponse tokenResponse = authService.login(request);
-        return ResponseEntity.ok(ResponseDto.of(tokenResponse, "로그인이 완료되었습니다."));
+        return ResponseEntity.ok(ResponseDto.success(tokenResponse, "로그인이 완료되었습니다."));
     }
 }

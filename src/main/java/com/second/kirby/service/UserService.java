@@ -2,7 +2,7 @@ package com.second.kirby.service;
 
 import com.second.kirby.domain.User;
 import com.second.kirby.exception.BusinessException;
-import com.second.kirby.exception.ErrorCode;
+import com.second.kirby.exception.ResponseCode;
 import com.second.kirby.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,12 +21,12 @@ public class UserService {
 
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ResponseCode.USER_NOT_FOUND));
     }
 
     public User findById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ResponseCode.USER_NOT_FOUND));
     }
 
 

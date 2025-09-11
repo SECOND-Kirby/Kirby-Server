@@ -1,31 +1,39 @@
 package com.second.kirby.dto;
 
-import lombok.Getter;
+import com.second.kirby.exception.ResponseCode;
+import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.time.LocalDateTime;
+@Schema(description = "공통 응답 형식")
+public record ResponseDto<T>(
+        @Schema(description = "성공 여부")
+        boolean success,
 
-@Getter
-public class ResponseDto<T> {
+        @Schema(description = "응답 코드")
+        String code,
 
-    private final LocalDateTime timeStamp;
-    private final String message;
-    private final T data;
+        @Schema(description = "응답 메시지")
+        String message,
 
-    public ResponseDto(LocalDateTime timeStamp, String message, T data) {
-        this.timeStamp = timeStamp;
-        this.message = message;
-        this.data = data;
+        @Schema(description = "응답 데이터")
+        T data
+) {
+    // 성공 응답 (데이터 있음)
+    public static <T> ResponseDto<T> success(T data, String message) {
+        return new ResponseDto<>(true, "S001", message, data);
     }
 
-    public static <T> ResponseDto<T> of(String message) {
-        return new ResponseDto<>(LocalDateTime.now(), message, null);
+    // 성공 응답 (데이터 없음)
+    public static ResponseDto<Void> success(String message) {
+        return new ResponseDto<>(true, "S001", message, null);
     }
 
-    public static <T> ResponseDto<T> of(T data) {
-        return new ResponseDto<>(LocalDateTime.now(), null, data);
+    // 실패 응답 (데이터 있음)
+    public static <T> ResponseDto<T> error(ResponseCode responseCode, String message, T data) {
+        return new ResponseDto<>(false, responseCode.getCode(), message, data);
     }
 
-    public static <T> ResponseDto<T> of(T data, String message) {
-        return new ResponseDto<>(LocalDateTime.now(), message, data);
+    // 실패 응답 (데이터 없음)
+    public static ResponseDto<Void> error(ResponseCode responseCode, String message) {
+        return new ResponseDto<>(false, responseCode.getCode(), message, null);
     }
 }
