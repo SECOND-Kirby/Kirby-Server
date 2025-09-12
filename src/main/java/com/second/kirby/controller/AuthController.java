@@ -11,10 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "인증", description = "회원가입 및 로그인 API")
 @RestController
@@ -37,5 +34,13 @@ public class AuthController {
     public ResponseEntity<ResponseDto<TokenResponse>> login(@Valid @RequestBody LoginRequest request) {
         TokenResponse tokenResponse = authService.login(request);
         return ResponseEntity.ok(ResponseDto.success(tokenResponse, "로그인이 완료되었습니다."));
+    }
+
+    @Operation(summary = "아이디 중복 확인", description = "아이디 사용 가능 여부를 확인합니다.")
+    @GetMapping("/check-username/{username}")
+    public ResponseEntity<ResponseDto<Boolean>> checkUsername(@PathVariable String username) {
+        boolean isAvailable = authService.checkUsernameAvailable(username);
+        String message = isAvailable ? "사용 가능한 아이디입니다." : "이미 사용중인 아이디입니다.";
+        return ResponseEntity.ok(ResponseDto.success(isAvailable, message));
     }
 }

@@ -24,7 +24,7 @@ public enum ResponseCode {
 
     // ========== 사용자 관리 ==========
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "사용자를 찾을 수 없습니다"),
-    USERNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "U002", "이미 존재하는 사용자명입니다"),
+    USERNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "U002", "이미 존재하는 아이디입니다"),
     EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "U003", "이미 존재하는 이메일입니다"),
     PHONE_NUMBER_ALREADY_EXISTS(HttpStatus.CONFLICT, "U004", "이미 존재하는 전화번호입니다"),
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "U005", "비밀번호가 일치하지 않습니다"),
