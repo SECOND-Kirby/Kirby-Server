@@ -79,6 +79,24 @@ public class AuthService implements UserDetailsService {
         return TokenResponse.of(accessToken, refreshToken, 3600L);
     }
 
+    // ========== 아이디 중복 확인 ==========
+
+    public boolean checkUsernameAvailable(String username) {
+        log.info("아이디 중복 확인: username={}", username);
+
+        // 입력값 검증
+        if (username == null || username.trim().isEmpty()) {
+            return false;
+        }
+
+        // 길이 및 형식 검증
+        if (username.length() < 6 || !username.matches("^[a-zA-Z0-9]+$")) {
+            return false;
+        }
+
+        return !userRepository.existsByUsername(username);
+    }
+
     // ========== Spring Security 연동 (JWT 필터용) ==========
 
     @Override
