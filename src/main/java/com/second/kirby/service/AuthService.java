@@ -90,7 +90,8 @@ public class AuthService implements UserDetailsService {
         }
 
         // 길이 및 형식 검증
-        if (username.length() < 6 || !username.matches("^[a-zA-Z0-9]+$")) {
+        if (username.length() < 4 || username.length() > 50 ||
+                !username.matches("^[a-zA-Z0-9]+$")) {
             return false;
         }
 
