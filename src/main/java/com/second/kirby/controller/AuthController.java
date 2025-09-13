@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
     private final AuthService authService;
@@ -39,8 +41,13 @@ public class AuthController {
     @Operation(summary = "아이디 중복 확인", description = "아이디 사용 가능 여부를 확인합니다.")
     @GetMapping("/check-username/{username}")
     public ResponseEntity<ResponseDto<Boolean>> checkUsername(@PathVariable String username) {
+        log.info("아이디 중복 확인 요청: {}", username);
+
         boolean isAvailable = authService.checkUsernameAvailable(username);
         String message = isAvailable ? "사용 가능한 아이디입니다." : "이미 사용중인 아이디입니다.";
+
+        log.info("아이디 중복 확인 결과: {} -> {}", username, isAvailable);
+
         return ResponseEntity.ok(ResponseDto.success(isAvailable, message));
     }
 }
