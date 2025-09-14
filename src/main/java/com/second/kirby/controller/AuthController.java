@@ -4,6 +4,7 @@ import com.second.kirby.dto.request.LoginRequest;
 import com.second.kirby.dto.ResponseDto;
 import com.second.kirby.dto.request.LogoutRequest;
 import com.second.kirby.dto.request.SignupRequest;
+import com.second.kirby.dto.request.UsernameCheckRequest;
 import com.second.kirby.dto.response.TokenResponse;
 import com.second.kirby.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -66,14 +67,9 @@ public class AuthController {
     }
 
     @Operation(summary = "아이디 중복 확인", description = "아이디 사용 가능 여부를 확인합니다.")
-    @GetMapping("/check-username/{username}")
-    public ResponseEntity<ResponseDto<Void>> checkUsername(@PathVariable String username) {
-        log.info("아이디 중복 확인 요청: {}", username);
-
-        authService.checkUsernameAvailable(username);
-
-        log.info("아이디 중복 확인 완료: {} - 사용 가능", username);
-
+    @PostMapping("/check-username")
+    public ResponseEntity<ResponseDto<Void>> checkUsername(@Valid @RequestBody UsernameCheckRequest request) {
+        authService.checkUsernameAvailable(request.username());
         return ResponseEntity.ok(ResponseDto.success("사용 가능한 아이디입니다."));
     }
 }
