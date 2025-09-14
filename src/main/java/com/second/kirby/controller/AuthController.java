@@ -40,14 +40,13 @@ public class AuthController {
 
     @Operation(summary = "아이디 중복 확인", description = "아이디 사용 가능 여부를 확인합니다.")
     @GetMapping("/check-username/{username}")
-    public ResponseEntity<ResponseDto<Boolean>> checkUsername(@PathVariable String username) {
+    public ResponseEntity<ResponseDto<Void>> checkUsername(@PathVariable String username) {
         log.info("아이디 중복 확인 요청: {}", username);
 
-        boolean isAvailable = authService.checkUsernameAvailable(username);
-        String message = isAvailable ? "사용 가능한 아이디입니다." : "이미 사용중인 아이디입니다.";
+        authService.checkUsernameAvailable(username);
 
-        log.info("아이디 중복 확인 결과: {} -> {}", username, isAvailable);
+        log.info("아이디 중복 확인 완료: {} - 사용 가능", username);
 
-        return ResponseEntity.ok(ResponseDto.success(isAvailable, message));
+        return ResponseEntity.ok(ResponseDto.success("사용 가능한 아이디입니다."));
     }
 }

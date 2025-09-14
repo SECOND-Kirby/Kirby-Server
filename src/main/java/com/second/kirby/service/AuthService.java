@@ -81,21 +81,18 @@ public class AuthService implements UserDetailsService {
 
     // ========== 아이디 중복 확인 ==========
 
-    public boolean checkUsernameAvailable(String username) {
+    public void checkUsernameAvailable(String username) {
         log.info("아이디 중복 확인: username={}", username);
 
-        // 입력값 검증
-        if (username == null || username.trim().isEmpty()) {
-            return false;
+        // 입력값 검증 - 예외 던지도록 변경
+        validateUsernameFormat(username);
+
+        // 중복 확인 - 중복이면 예외 던짐
+        if (userRepository.existsByUsername(username)) {
+            throw new BusinessException(ResponseCode.USERNAME_ALREADY_EXISTS);
         }
 
-        // 길이 및 형식 검증
-        if (username.length() < 4 || username.length() > 50 ||
-                !username.matches("^[a-zA-Z0-9]+$")) {
-            return false;
-        }
-
-        return !userRepository.existsByUsername(username);
+        log.info("사용 가능한 아이디: {}", username);
     }
 
     // ========== Spring Security 연동 (JWT 필터용) ==========
@@ -112,7 +109,7 @@ public class AuthService implements UserDetailsService {
                 .build();
     }
 
-    // ========== 중복 검증 ==========
+    // ========== 검증 메서드들 ==========
 
     private void validateDuplication(String username, String email, String phoneNumber) {
         if (userRepository.existsByUsername(username)) {
@@ -125,6 +122,20 @@ public class AuthService implements UserDetailsService {
 
         if (userRepository.existsByPhoneNumber(phoneNumber)) {
             throw new BusinessException(ResponseCode.PHONE_NUMBER_ALREADY_EXISTS);
+        }
+    }
+
+    private void validateUsernameFormat(String username) {
+        if (username == null || username.trim().isEmpty()) {
+            throw new BusinessException(ResponseCode.INVALID_INPUT_VALUE, "아이디를 입력해주세요");
+        }
+
+        if (username.length() < 4 || username.length() > 50) {
+            throw new BusinessException(ResponseCode.INVALID_INPUT_VALUE, "아이디는 4-50자 사이로 입력해주세요");
+        }
+
+        if (!username.matches("^[a-zA-Z0-9]+$")) {
+            throw new BusinessException(ResponseCode.INVALID_INPUT_VALUE, "아이디는 영문자와 숫자만 사용 가능합니다");
         }
     }
 }
