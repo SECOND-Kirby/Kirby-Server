@@ -7,6 +7,8 @@ import jakarta.persistence.Table;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -32,4 +34,9 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String password;
 
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
+
+    @Column(name = "last_logout_at")
+    private LocalDateTime lastLogoutAt;
 }
