@@ -7,14 +7,14 @@ import jakarta.validation.constraints.*;
 public record SignupRequest(
         @Schema(description = "아이디", example = "user123")
         @NotBlank(message = "아이디를 입력해주세요")
-        @Size(min = 4, max = 50, message = "아이디는 4-50자 사이로 입력해주세요")
+        @Size(min = 6, max = 20, message = "아이디는 6-20자 사이로 입력해주세요")
         @Pattern(regexp = "^[a-zA-Z0-9]+$", message = "아이디는 영문자와 숫자만 사용 가능합니다")
         String username,
 
         @Schema(description = "이메일", example = "user@example.com")
         @NotBlank(message = "이메일을 입력해주세요")
         @Email(message = "올바른 이메일 형식이 아닙니다")
-        @Size(max = 100, message = "이메일은 100자를 초과할 수 없습니다")
+        @Size(max = 50, message = "이메일은 50자를 초과할 수 없습니다")
         String email,
 
         @Schema(description = "전화번호", example = "010-1234-5678")
@@ -24,8 +24,8 @@ public record SignupRequest(
 
         @Schema(description = "이름", example = "홍길동")
         @NotBlank(message = "이름을 입력해주세요")
-        @Size(min = 2, max = 100, message = "이름은 2-100자 사이로 입력해주세요")
-        @Pattern(regexp = "^[가-힣a-zA-Z\\s]+$", message = "이름은 한글, 영문자, 공백만 사용 가능합니다")
+        @Size(min = 2, max = 10, message = "이름은 2-10자 사이로 입력해주세요")
+        @Pattern(regexp = "^[가-힣a-zA-Z]+$", message = "이름은 한글 또는 영문자만 사용 가능합니다")
         String name,
 
         @Schema(description = "비밀번호", example = "password123!")
