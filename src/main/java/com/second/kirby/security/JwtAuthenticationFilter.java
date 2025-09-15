@@ -34,22 +34,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             String token = getTokenFromRequest(request);
 
-            if (StringUtils.hasText(token) && jwtUtil.validateToken(token)) {
-                String username = jwtUtil.getUsername(token);
+            if (StringUtils.hasText(token)) {
+                // AuthService의 토큰 검증 사용 (로그아웃 시간 체크 포함)
+                if (authService.isTokenValidForUser(token)) {
+                    String username = jwtUtil.getUsername(token);
+                    UserDetails userDetails = authService.loadUserByUsername(username);
 
-                UserDetails userDetails = authService.loadUserByUsername(username);
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
 
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-
-                log.debug("JWT 인증 성공: username={}", username);
+                    log.debug("JWT 인증 성공: username={}", username);
+                } else {
+                    log.debug("유효하지 않은 토큰");
+                }
             }
         } catch (Exception e) {
             log.error("JWT 인증 실패: {}", e.getMessage());

@@ -85,6 +85,12 @@ public class JwtUtil {
         return claims.get("username", String.class);
     }
 
+    // 토큰 발급 시간 추출 (밀리초)
+    public long getIssuedAt(String token) {
+        Claims claims = parseClaims(token);
+        return claims.getIssuedAt().getTime();
+    }
+
     // 토큰 만료 확인
     public boolean isTokenExpired(String token) {
         try {

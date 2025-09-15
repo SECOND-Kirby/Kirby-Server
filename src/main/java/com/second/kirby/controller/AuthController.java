@@ -2,7 +2,9 @@ package com.second.kirby.controller;
 
 import com.second.kirby.dto.request.LoginRequest;
 import com.second.kirby.dto.ResponseDto;
+import com.second.kirby.dto.request.LogoutRequest;
 import com.second.kirby.dto.request.SignupRequest;
+import com.second.kirby.dto.request.UsernameCheckRequest;
 import com.second.kirby.dto.response.TokenResponse;
 import com.second.kirby.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,7 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "인증", description = "회원가입 및 로그인 API")
+@Tag(name = "인증", description = "회원가입, 로그인, 로그아웃 API")
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -38,16 +40,36 @@ public class AuthController {
         return ResponseEntity.ok(ResponseDto.success(tokenResponse, "로그인이 완료되었습니다."));
     }
 
+    @Operation(summary = "로그아웃", description = "현재 토큰을 무효화합니다. 토큰이 만료되어도 정상 처리됩니다.")
+    @PostMapping("/logout")
+    public ResponseEntity<ResponseDto<Void>> logout(
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
+            @RequestBody(required = false) LogoutRequest request) {
+
+        log.info("로그아웃 요청");
+
+        // 토큰 추출 우선순위: Authorization 헤더 > RequestBody
+        String accessToken = null;
+
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            accessToken = authorizationHeader.substring(7);
+        } else if (request != null && request.accessToken() != null) {
+            accessToken = request.accessToken();
+        }
+
+        if (accessToken == null) {
+            log.info("토큰 없이 로그아웃 요청 - 정상 처리");
+            return ResponseEntity.ok(ResponseDto.success("로그아웃이 완료되었습니다."));
+        }
+
+        authService.logout(accessToken);
+        return ResponseEntity.ok(ResponseDto.success("로그아웃이 완료되었습니다."));
+    }
+
     @Operation(summary = "아이디 중복 확인", description = "아이디 사용 가능 여부를 확인합니다.")
-    @GetMapping("/check-username/{username}")
-    public ResponseEntity<ResponseDto<Boolean>> checkUsername(@PathVariable String username) {
-        log.info("아이디 중복 확인 요청: {}", username);
-
-        boolean isAvailable = authService.checkUsernameAvailable(username);
-        String message = isAvailable ? "사용 가능한 아이디입니다." : "이미 사용중인 아이디입니다.";
-
-        log.info("아이디 중복 확인 결과: {} -> {}", username, isAvailable);
-
-        return ResponseEntity.ok(ResponseDto.success(isAvailable, message));
+    @PostMapping("/check-username")
+    public ResponseEntity<ResponseDto<Void>> checkUsername(@Valid @RequestBody UsernameCheckRequest request) {
+        authService.checkUsernameAvailable(request.username());
+        return ResponseEntity.ok(ResponseDto.success("사용 가능한 아이디입니다."));
     }
 }

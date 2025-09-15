@@ -27,8 +27,9 @@ public enum ResponseCode {
     USERNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "U002", "이미 존재하는 아이디입니다"),
     EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "U003", "이미 존재하는 이메일입니다"),
     PHONE_NUMBER_ALREADY_EXISTS(HttpStatus.CONFLICT, "U004", "이미 존재하는 전화번호입니다"),
-    INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "U005", "비밀번호가 일치하지 않습니다"),
+    INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "U005", "현재 비밀번호가 일치하지 않습니다"),
     PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "U006", "비밀번호 확인이 일치하지 않습니다"),
+    SAME_AS_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "U007", "새 비밀번호가 현재 비밀번호와 동일합니다"),
 
     // ========== 로봇 관리 ==========
     ROBOT_NOT_CONNECTED(HttpStatus.BAD_REQUEST, "R001", "로봇에 연결되지 않았습니다"),
