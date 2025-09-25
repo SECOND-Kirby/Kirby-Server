@@ -44,9 +44,12 @@ public class TrainingService {
         // 입력값 검증
         validateTrainingConfig(request);
 
-        // 로봇 연결 권한 확인
+        // 로봇 연결 권한 확인 및 자동 연결 시도
         if (!robotBridgeService.hasRobotAccess(userId)) {
-            throw new BusinessException(ResponseCode.ROBOT_NOT_CONNECTED);
+            var connect = robotBridgeService.connectRobot(userId);
+            if (!connect.success()) {
+                throw new BusinessException(ResponseCode.ROBOT_ALREADY_CONNECTED, connect.message());
+            }
         }
 
         // 진행중인 훈련 확인

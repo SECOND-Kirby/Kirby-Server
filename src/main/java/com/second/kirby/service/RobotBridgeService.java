@@ -175,9 +175,7 @@ public class RobotBridgeService {
                 "command", "START_TRAINING",
                 "trainingId", trainingId,
                 "intensity", config.intensity(),
-                "direction", config.direction(),
-                "frequency", config.frequency(),
-                "durationMinutes", config.durationMinutes()
+                "frequency", config.frequency()
         );
 
         sendCommandToRobot(command);

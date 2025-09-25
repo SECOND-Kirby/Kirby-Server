@@ -28,7 +28,10 @@ public class CollectionService {
                 .ifPresent(s -> { throw new BusinessException(ResponseCode.TRAINING_ALREADY_EXISTS, "진행중인 공 수거가 있습니다."); });
 
         if (!robotBridgeService.hasRobotAccess(userId)) {
-            throw new BusinessException(ResponseCode.ROBOT_NOT_CONNECTED);
+            var connect = robotBridgeService.connectRobot(userId);
+            if (!connect.success()) {
+                throw new BusinessException(ResponseCode.ROBOT_ALREADY_CONNECTED, connect.message());
+            }
         }
 
         BallCollection session = BallCollection.builder()
