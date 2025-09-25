@@ -1,8 +1,8 @@
 package com.second.kirby.service;
 
 import com.second.kirby.domain.User;
-import com.second.kirby.dto.request.LoginRequest;
-import com.second.kirby.dto.request.SignupRequest;
+import com.second.kirby.dto.request.user.LoginRequest;
+import com.second.kirby.dto.request.user.SignupRequest;
 import com.second.kirby.dto.response.TokenResponse;
 import com.second.kirby.exception.BusinessException;
 import com.second.kirby.exception.ResponseCode;
