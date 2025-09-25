@@ -175,9 +175,7 @@ public class RobotBridgeService {
                 "command", "START_TRAINING",
                 "trainingId", trainingId,
                 "intensity", config.intensity(),
-                "direction", config.direction(),
-                "frequency", config.frequency(),
-                "durationMinutes", config.durationMinutes()
+                "frequency", config.frequency()
         );
 
         sendCommandToRobot(command);
@@ -213,6 +211,23 @@ public class RobotBridgeService {
                 "trainingId", trainingId
         );
 
+        sendCommandToRobot(command);
+    }
+
+    // ========== 공 수거 명령 ==========
+
+    public void sendCollectionStartCommand() {
+        log.info("로봇에 공 수거 시작 명령 전송");
+        Map<String, Object> command = new HashMap<>();
+        command.put("command", "START_COLLECTION");
+        sendCommandToRobot(command);
+    }
+
+    public void sendCollectionStopCommand() {
+        log.info("로봇에 공 수거 종료 명령 전송");
+        Map<String, Object> command = Map.of(
+                "command", "STOP_COLLECTION"
+        );
         sendCommandToRobot(command);
     }
 
