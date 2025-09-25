@@ -31,6 +31,10 @@ public enum ResponseCode {
     PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "U006", "비밀번호 확인이 일치하지 않습니다"),
     SAME_AS_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "U007", "새 비밀번호가 현재 비밀번호와 동일합니다"),
 
+    // ========== 스케줄 관리 추가 ==========
+    SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "S001", "일정을 찾을 수 없습니다"),
+    INVALID_SCHEDULE_TIME(HttpStatus.BAD_REQUEST, "S003", "종료 시간이 시작 시간보다 빨라서는 안됩니다"),
+
     // ========== 로봇 관리 ==========
     ROBOT_NOT_CONNECTED(HttpStatus.BAD_REQUEST, "R001", "로봇에 연결되지 않았습니다"),
     ROBOT_ALREADY_CONNECTED(HttpStatus.CONFLICT, "R002", "이미 다른 사용자가 로봇을 사용중입니다"),
