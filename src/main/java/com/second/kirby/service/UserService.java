@@ -1,8 +1,8 @@
 package com.second.kirby.service;
 
 import com.second.kirby.domain.User;
-import com.second.kirby.dto.request.PasswordChangeRequest;
-import com.second.kirby.dto.request.ProfileUpdateRequest;
+import com.second.kirby.dto.request.user.PasswordChangeRequest;
+import com.second.kirby.dto.request.user.ProfileUpdateRequest;
 import com.second.kirby.exception.BusinessException;
 import com.second.kirby.exception.ResponseCode;
 import com.second.kirby.repository.UserRepository;

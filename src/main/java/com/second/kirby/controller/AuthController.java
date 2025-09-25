@@ -1,10 +1,10 @@
 package com.second.kirby.controller;
 
-import com.second.kirby.dto.request.LoginRequest;
+import com.second.kirby.dto.request.user.LoginRequest;
 import com.second.kirby.dto.ResponseDto;
-import com.second.kirby.dto.request.LogoutRequest;
-import com.second.kirby.dto.request.SignupRequest;
-import com.second.kirby.dto.request.UsernameCheckRequest;
+import com.second.kirby.dto.request.user.LogoutRequest;
+import com.second.kirby.dto.request.user.SignupRequest;
+import com.second.kirby.dto.request.user.UsernameCheckRequest;
 import com.second.kirby.dto.response.TokenResponse;
 import com.second.kirby.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
