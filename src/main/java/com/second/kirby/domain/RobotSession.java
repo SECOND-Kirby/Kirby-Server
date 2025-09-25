@@ -74,6 +74,7 @@ public class RobotSession extends BaseEntity {
     public enum RobotState {
         IDLE,           // 대기중
         CONNECTED,      // 연결됨
-        TRAINING        // 훈련중
+        TRAINING,       // 훈련중
+        COLLECTING      // 공 수거중
     }
 }

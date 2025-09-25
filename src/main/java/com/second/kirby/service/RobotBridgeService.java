@@ -216,6 +216,23 @@ public class RobotBridgeService {
         sendCommandToRobot(command);
     }
 
+    // ========== 공 수거 명령 ==========
+
+    public void sendCollectionStartCommand() {
+        log.info("로봇에 공 수거 시작 명령 전송");
+        Map<String, Object> command = new HashMap<>();
+        command.put("command", "START_COLLECTION");
+        sendCommandToRobot(command);
+    }
+
+    public void sendCollectionStopCommand() {
+        log.info("로봇에 공 수거 종료 명령 전송");
+        Map<String, Object> command = Map.of(
+                "command", "STOP_COLLECTION"
+        );
+        sendCommandToRobot(command);
+    }
+
     // ========== 연결 권한 확인 ==========
 
     public boolean hasRobotAccess(Long userId) {
