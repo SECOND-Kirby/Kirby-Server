@@ -8,6 +8,7 @@ import com.second.kirby.exception.BusinessException;
 import com.second.kirby.exception.ResponseCode;
 import com.second.kirby.repository.UserRepository;
 import com.second.kirby.util.JwtUtil;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -83,6 +84,49 @@ public class AuthService implements UserDetailsService {
         log.info("로그인 성공: userId={}, username={}", user.getId(), user.getUsername());
 
         return TokenResponse.of(accessToken, refreshToken, 3600L);
+    }
+
+    // ========== 토큰 갱신 ==========
+
+    @Transactional
+    public TokenResponse refreshToken(String refreshToken) {
+        log.info("토큰 갱신 요청");
+
+        // 리프레시 토큰 유효성 검증
+        if (!jwtUtil.validateToken(refreshToken)) {
+            throw new BusinessException(ResponseCode.INVALID_TOKEN, "유효하지 않은 리프레시 토큰입니다.");
+        }
+
+        // 토큰 타입 확인
+        Claims claims = jwtUtil.parseClaims(refreshToken);
+        String tokenType = claims.get("tokenType", String.class);
+        if (!"REFRESH".equals(tokenType)) {
+            throw new BusinessException(ResponseCode.INVALID_TOKEN, "리프레시 토큰이 아닙니다.");
+        }
+
+        // 사용자 ID 추출 및 사용자 조회
+        Long userId = Long.parseLong(claims.getSubject());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ResponseCode.USER_NOT_FOUND));
+
+        // 로그아웃 이후 발급된 토큰인지 확인
+        if (user.getLastLogoutAt() != null) {
+            long tokenIssuedAt = jwtUtil.getIssuedAt(refreshToken);
+            long lastLogoutTime = user.getLastLogoutAt().atZone(java.time.ZoneId.systemDefault())
+                    .toInstant().toEpochMilli();
+
+            if (tokenIssuedAt < lastLogoutTime) {
+                throw new BusinessException(ResponseCode.INVALID_TOKEN, "로그아웃된 토큰입니다.");
+            }
+        }
+
+        // 새 토큰 생성
+        String newAccessToken = jwtUtil.generateAccessToken(user.getId(), user.getUsername());
+        String newRefreshToken = jwtUtil.generateRefreshToken(user.getId());
+
+        log.info("토큰 갱신 완료: userId={}, username={}", user.getId(), user.getUsername());
+
+        return TokenResponse.of(newAccessToken, newRefreshToken, 3600L);
     }
 
     // ========== 로그아웃 ==========
