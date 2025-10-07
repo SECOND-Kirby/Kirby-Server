@@ -3,6 +3,7 @@ package com.second.kirby.controller;
 import com.second.kirby.dto.request.user.LoginRequest;
 import com.second.kirby.dto.ResponseDto;
 import com.second.kirby.dto.request.user.LogoutRequest;
+import com.second.kirby.dto.request.user.RefreshTokenRequest;
 import com.second.kirby.dto.request.user.SignupRequest;
 import com.second.kirby.dto.request.user.UsernameCheckRequest;
 import com.second.kirby.dto.response.TokenResponse;
@@ -38,6 +39,13 @@ public class AuthController {
     public ResponseEntity<ResponseDto<TokenResponse>> login(@Valid @RequestBody LoginRequest request) {
         TokenResponse tokenResponse = authService.login(request);
         return ResponseEntity.ok(ResponseDto.success(tokenResponse, "로그인이 완료되었습니다."));
+    }
+
+    @Operation(summary = "토큰 갱신", description = "리프레시 토큰으로 새로운 액세스 토큰을 발급합니다.")
+    @PostMapping("/refresh")
+    public ResponseEntity<ResponseDto<TokenResponse>> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        TokenResponse tokenResponse = authService.refreshToken(request.refreshToken());
+        return ResponseEntity.ok(ResponseDto.success(tokenResponse, "토큰이 갱신되었습니다."));
     }
 
     @Operation(summary = "로그아웃", description = "현재 토큰을 무효화합니다. 토큰이 만료되어도 정상 처리됩니다.")

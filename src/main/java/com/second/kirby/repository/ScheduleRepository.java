@@ -20,6 +20,31 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     Optional<Schedule> findByIdAndUserId(Long id, Long userId);
 
     // 사용자의 월별 스케줄이 있는 날짜 목록
-    @Query("SELECT DISTINCT s.scheduleDate FROM Schedule s WHERE s.userId = :userId AND s.scheduleDate BETWEEN :startDate AND :endDate")
-    List<LocalDate> findScheduleDatesInRange(@Param("userId") Long userId, @Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+    @Query("SELECT DISTINCT s.scheduleDate FROM Schedule s " +
+            "WHERE s.userId = :userId " +
+            "AND s.scheduleDate BETWEEN :startDate AND :endDate " +
+            "ORDER BY s.scheduleDate")
+    List<LocalDate> findScheduleDatesInRange(
+            @Param("userId") Long userId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
+    // 반복 일정 ID로 조회 (개별 수정되지 않은 것만)
+    List<Schedule> findByRecurringScheduleIdAndIsModifiedFalse(Long recurringScheduleId);
+
+    // 반복 일정 ID로 모든 일정 조회
+    List<Schedule> findByRecurringScheduleId(Long recurringScheduleId);
+
+    // 특정 날짜 이후의 반복 일정 삭제
+    void deleteByRecurringScheduleIdAndScheduleDateGreaterThanEqual(
+            Long recurringScheduleId,
+            LocalDate date
+    );
+
+    // 반복 일정 전체 삭제
+    void deleteByRecurringScheduleId(Long recurringScheduleId);
+
+    // 사용자의 특정 일정 존재 여부 확인
+    boolean existsByIdAndUserId(Long id, Long userId);
 }
