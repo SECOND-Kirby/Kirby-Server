@@ -5,8 +5,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Schema(description = "스케줄 생성 요청")
 public record ScheduleCreateRequest(
@@ -29,6 +31,26 @@ public record ScheduleCreateRequest(
 
         @Schema(description = "메모", example = "집중 동작 반복")
         @Size(max = 500, message = "메모는 500자를 초과할 수 없습니다")
-        String memo
+        String memo,
+
+        @Schema(description = "반복 요일 (매주 반복)", example = "[\"MONDAY\", \"WEDNESDAY\", \"FRIDAY\"]")
+        List<DayOfWeek> repeatDays,
+
+        @Schema(description = "반복 종료 날짜 (반복 설정 시 필수)", example = "2025-12-31")
+        LocalDate repeatEndDate
 ) {
+        /**
+         * 반복 일정 검증
+         * 반복 요일이 설정된 경우 종료 날짜가 필수입니다.
+         */
+        public void validate() {
+                if (repeatDays != null && !repeatDays.isEmpty()) {
+                        if (repeatEndDate == null) {
+                                throw new IllegalArgumentException("반복 종료 날짜는 필수입니다.");
+                        }
+                        if (repeatEndDate.isBefore(scheduleDate)) {
+                                throw new IllegalArgumentException("종료 날짜는 시작 날짜 이후여야 합니다.");
+                        }
+                }
+        }
 }

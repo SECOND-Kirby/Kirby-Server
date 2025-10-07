@@ -29,6 +29,19 @@ public record ScheduleUpdateRequest(
 
         @Schema(description = "메모", example = "집중 동작 반복 (수정)")
         @Size(max = 500, message = "메모는 500자를 초과할 수 없습니다")
-        String memo
+        String memo,
+
+        @Schema(description = "수정 범위", example = "THIS_ONLY",
+                allowableValues = {"THIS_ONLY", "THIS_AND_FUTURE", "ALL"})
+        @NotNull(message = "수정 범위를 선택해주세요")
+        UpdateScope updateScope
 ) {
+        /**
+         * 수정 범위
+         */
+        public enum UpdateScope {
+                THIS_ONLY,          // 이 일정만
+                THIS_AND_FUTURE,    // 이후 모든 일정
+                ALL                 // 전체 반복 일정
+        }
 }

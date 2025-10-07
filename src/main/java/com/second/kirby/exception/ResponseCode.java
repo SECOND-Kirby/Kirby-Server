@@ -16,6 +16,8 @@ public enum ResponseCode {
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "E002", "잘못된 입력값입니다"),
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "E003", "지원하지 않는 HTTP 메서드입니다"),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "E004", "접근 권한이 없습니다"),
+    BAD_REQUEST(HttpStatus.BAD_REQUEST, "E005", "잘못된 요청입니다"),
+    FORBIDDEN(HttpStatus.FORBIDDEN, "E006", "권한이 없습니다"),
 
     // ========== 인증/인가 ==========
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "A001", "유효하지 않은 토큰입니다"),
@@ -31,9 +33,12 @@ public enum ResponseCode {
     PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "U006", "비밀번호 확인이 일치하지 않습니다"),
     SAME_AS_CURRENT_PASSWORD(HttpStatus.BAD_REQUEST, "U007", "새 비밀번호가 현재 비밀번호와 동일합니다"),
 
-    // ========== 스케줄 관리 추가 ==========
-    SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "S001", "일정을 찾을 수 없습니다"),
-    INVALID_SCHEDULE_TIME(HttpStatus.BAD_REQUEST, "S003", "종료 시간이 시작 시간보다 빨라서는 안됩니다"),
+    // ========== 스케줄 관리 ==========
+    SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "SCH001", "일정을 찾을 수 없습니다"),
+    RECURRING_SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "SCH002", "반복 일정을 찾을 수 없습니다"),
+    INVALID_SCHEDULE_TIME(HttpStatus.BAD_REQUEST, "SCH003", "종료 시간이 시작 시간보다 빨라서는 안됩니다"),
+    INVALID_REPEAT_END_DATE(HttpStatus.BAD_REQUEST, "SCH004", "반복 종료 날짜는 시작 날짜 이후여야 합니다"),
+    REPEAT_END_DATE_REQUIRED(HttpStatus.BAD_REQUEST, "SCH005", "반복 설정 시 종료 날짜는 필수입니다"),
 
     // ========== 로봇 관리 ==========
     ROBOT_NOT_CONNECTED(HttpStatus.BAD_REQUEST, "R001", "로봇에 연결되지 않았습니다"),
