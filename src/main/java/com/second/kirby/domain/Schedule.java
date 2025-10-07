@@ -17,6 +17,9 @@ import java.time.LocalTime;
 @EntityListeners(AuditingEntityListener.class)
 public class Schedule extends BaseEntity {
 
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
+
     @Column(nullable = false, length = 100)
     private String title;
 
@@ -32,6 +35,11 @@ public class Schedule extends BaseEntity {
     @Column(length = 500)
     private String memo;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @Column(name = "recurring_schedule_id")
+    private Long recurringScheduleId;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean isModified = false;
+
 }
