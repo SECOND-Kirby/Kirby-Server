@@ -2,12 +2,10 @@ package com.second.kirby.controller;
 
 import com.second.kirby.domain.User;
 import com.second.kirby.dto.ResponseDto;
+import com.second.kirby.dto.request.user.DeleteAccountRequest;
 import com.second.kirby.dto.request.user.PasswordChangeRequest;
 import com.second.kirby.dto.request.user.ProfileUpdateRequest;
-import com.second.kirby.exception.BusinessException;
-import com.second.kirby.exception.ResponseCode;
 import com.second.kirby.service.UserService;
-import com.second.kirby.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-    private final JwtUtil jwtUtil;
 
     @Operation(summary = "내 정보 조회", description = "현재 로그인한 사용자의 정보를 조회합니다.")
     @SecurityRequirement(name = "bearerAuth")
@@ -47,13 +44,11 @@ public class UserController {
     @SecurityRequirement(name = "bearerAuth")
     @PutMapping("/profile")
     public ResponseEntity<ResponseDto<Void>> updateProfile(
-            @RequestHeader("Authorization") String authorizationHeader,
+            Authentication authentication,
             @Valid @RequestBody ProfileUpdateRequest request) {
 
-        String accessToken = extractTokenFromHeader(authorizationHeader);
-        Long userId = jwtUtil.getUserId(accessToken);
-
-        userService.updateProfile(userId, request);
+        User user = userService.findByUsername(authentication.getName());
+        userService.updateProfile(user.getId(), request);
 
         return ResponseEntity.ok(ResponseDto.success("프로필 정보가 변경되었습니다."));
     }
@@ -62,23 +57,26 @@ public class UserController {
     @SecurityRequirement(name = "bearerAuth")
     @PutMapping("/password")
     public ResponseEntity<ResponseDto<Void>> changePassword(
-            @RequestHeader("Authorization") String authorizationHeader,
+            Authentication authentication,
             @Valid @RequestBody PasswordChangeRequest request) {
 
-        String accessToken = extractTokenFromHeader(authorizationHeader);
-        Long userId = jwtUtil.getUserId(accessToken);
-
-        userService.changePassword(userId, request);
+        User user = userService.findByUsername(authentication.getName());
+        userService.changePassword(user.getId(), request);
 
         return ResponseEntity.ok(ResponseDto.success("비밀번호가 변경되었습니다."));
     }
 
-    // Bearer 토큰 추출 헬퍼 메서드
-    private String extractTokenFromHeader(String authorizationHeader) {
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            throw new BusinessException(ResponseCode.UNAUTHORIZED, "액세스 토큰이 필요합니다");
-        }
-        return authorizationHeader.substring(7);
+    @Operation(summary = "회원 탈퇴", description = "현재 비밀번호 확인 후 모든 개인 데이터를 삭제하고 회원 탈퇴합니다.")
+    @SecurityRequirement(name = "bearerAuth")
+    @DeleteMapping("/me")
+    public ResponseEntity<ResponseDto<Void>> deleteAccount(
+            Authentication authentication,
+            @Valid @RequestBody DeleteAccountRequest request) {
+
+        User user = userService.findByUsername(authentication.getName());
+        userService.deleteAccount(user.getId(), request);
+
+        return ResponseEntity.ok(ResponseDto.success("회원 탈퇴가 완료되었습니다."));
     }
 
     // 사용자 정보 응답 DTO

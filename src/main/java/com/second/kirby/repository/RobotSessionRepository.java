@@ -22,4 +22,6 @@ public interface RobotSessionRepository extends JpaRepository<RobotSession, Long
     // 만료된 세션들 조회
     @Query("SELECT rs FROM RobotSession rs WHERE rs.lastHeartbeat < :expireTime AND rs.connectedUserId IS NOT NULL")
     List<RobotSession> findExpiredSessions(LocalDateTime expireTime);
+
+
 }

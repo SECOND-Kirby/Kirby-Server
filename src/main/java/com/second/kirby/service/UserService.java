@@ -1,11 +1,13 @@
 package com.second.kirby.service;
 
+import com.second.kirby.domain.RobotSession;
 import com.second.kirby.domain.User;
+import com.second.kirby.dto.request.user.DeleteAccountRequest;
 import com.second.kirby.dto.request.user.PasswordChangeRequest;
 import com.second.kirby.dto.request.user.ProfileUpdateRequest;
 import com.second.kirby.exception.BusinessException;
 import com.second.kirby.exception.ResponseCode;
-import com.second.kirby.repository.UserRepository;
+import com.second.kirby.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,6 +22,11 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ScheduleRepository scheduleRepository;
+    private final RecurringScheduleRepository recurringScheduleRepository;
+    private final TrainingRepository trainingRepository;
+    private final BallCollectionRepository ballCollectionRepository;
+    private final RobotSessionRepository robotSessionRepository;
 
     // ========== 사용자 조회 ==========
 
@@ -87,5 +94,56 @@ public class UserService {
         userRepository.save(user);
 
         log.info("비밀번호 변경 완료: userId={}", userId);
+    }
+
+    // ========== 회원 탈퇴 ==========
+
+    @Transactional
+    public void deleteAccount(Long userId, DeleteAccountRequest request) {
+        log.info("회원 탈퇴 요청: userId={}", userId);
+
+        User user = findById(userId);
+
+        // 비밀번호 확인
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+            throw new BusinessException(ResponseCode.INVALID_PASSWORD);
+        }
+
+        // 연관 데이터 삭제
+        deleteUserRelatedData(userId);
+
+        // 사용자 삭제
+        userRepository.delete(user);
+
+        log.info("회원 탈퇴 완료: userId={}, username={}", userId, user.getUsername());
+    }
+
+    // ========== 연관 데이터 삭제 ==========
+
+    private void deleteUserRelatedData(Long userId) {
+        log.info("사용자 연관 데이터 삭제 시작: userId={}", userId);
+
+        // 로봇 세션 연결 해제
+        robotSessionRepository.findByConnectedUserId(userId).ifPresent(session -> {
+            log.info("로봇 세션 연결 해제: sessionId={}", session.getId());
+            session.disconnect();
+            robotSessionRepository.save(session);
+        });
+
+        // 일정 삭제
+        scheduleRepository.deleteByUserId(userId);
+        log.info("일정 삭제 완료: userId={}", userId);
+
+        // 반복 일정 삭제
+        recurringScheduleRepository.deleteByUserId(userId);
+        log.info("반복 일정 삭제 완료: userId={}", userId);
+
+        // 훈련 기록 삭제
+        trainingRepository.deleteByUserId(userId);
+        log.info("훈련 기록 삭제 완료: userId={}", userId);
+
+        // 공 수거 기록 삭제
+        ballCollectionRepository.deleteByUserId(userId);
+        log.info("공 수거 기록 삭제 완료: userId={}", userId);
     }
 }
