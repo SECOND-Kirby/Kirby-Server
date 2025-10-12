@@ -47,4 +47,7 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
     // 사용자의 특정 일정 존재 여부 확인
     boolean existsByIdAndUserId(Long id, Long userId);
+
+    // 특정 사용자의 모든 일정 삭제
+    void deleteByUserId(Long userId);
 }

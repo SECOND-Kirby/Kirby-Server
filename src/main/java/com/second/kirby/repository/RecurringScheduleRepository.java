@@ -18,4 +18,7 @@ public interface RecurringScheduleRepository extends JpaRepository<RecurringSche
 
     // 존재 여부 확인
     boolean existsByIdAndUserId(Long id, Long userId);
+
+    // 특정 사용자의 모든 반복 일정 삭제
+    void deleteByUserId(Long userId);
 }

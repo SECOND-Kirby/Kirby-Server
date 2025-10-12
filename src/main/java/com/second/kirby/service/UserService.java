@@ -1,11 +1,13 @@
 package com.second.kirby.service;
 
+import com.second.kirby.domain.RobotSession;
 import com.second.kirby.domain.User;
+import com.second.kirby.dto.request.user.DeleteAccountRequest;
 import com.second.kirby.dto.request.user.PasswordChangeRequest;
 import com.second.kirby.dto.request.user.ProfileUpdateRequest;
 import com.second.kirby.exception.BusinessException;
 import com.second.kirby.exception.ResponseCode;
-import com.second.kirby.repository.UserRepository;
+import com.second.kirby.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,6 +22,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ScheduleRepository scheduleRepository;
+    private final RecurringScheduleRepository recurringScheduleRepository;
+    private final TrainingRepository trainingRepository;
+    private final BallCollectionRepository ballCollectionRepository;
+    private final RobotSessionRepository robotSessionRepository;
+    private final FileStorageService fileStorageService;
 
     // ========== 사용자 조회 ==========
 
@@ -87,5 +95,105 @@ public class UserService {
         userRepository.save(user);
 
         log.info("비밀번호 변경 완료: userId={}", userId);
+    }
+
+    // ========== 회원 탈퇴 ==========
+
+    @Transactional
+    public void deleteAccount(Long userId, DeleteAccountRequest request) {
+        log.info("회원 탈퇴 요청: userId={}", userId);
+
+        User user = findById(userId);
+
+        // 비밀번호 확인
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+            throw new BusinessException(ResponseCode.INVALID_PASSWORD);
+        }
+
+        // 프로필 이미지 삭제
+        if (user.getProfileImageUrl() != null) {
+            fileStorageService.deleteProfileImage(user.getProfileImageUrl());
+        }
+
+        // 연관 데이터 삭제
+        deleteUserRelatedData(userId);
+
+        // 사용자 삭제
+        userRepository.delete(user);
+
+        log.info("회원 탈퇴 완료: userId={}, username={}", userId, user.getUsername());
+    }
+
+    // ========== 연관 데이터 삭제 ==========
+
+    private void deleteUserRelatedData(Long userId) {
+        log.info("사용자 연관 데이터 삭제 시작: userId={}", userId);
+
+        // 로봇 세션 연결 해제
+        robotSessionRepository.findByConnectedUserId(userId).ifPresent(session -> {
+            log.info("로봇 세션 연결 해제: sessionId={}", session.getId());
+            session.disconnect();
+            robotSessionRepository.save(session);
+        });
+
+        // 일정 삭제
+        scheduleRepository.deleteByUserId(userId);
+        log.info("일정 삭제 완료: userId={}", userId);
+
+        // 반복 일정 삭제
+        recurringScheduleRepository.deleteByUserId(userId);
+        log.info("반복 일정 삭제 완료: userId={}", userId);
+
+        // 훈련 기록 삭제
+        trainingRepository.deleteByUserId(userId);
+        log.info("훈련 기록 삭제 완료: userId={}", userId);
+
+        // 공 수거 기록 삭제
+        ballCollectionRepository.deleteByUserId(userId);
+        log.info("공 수거 기록 삭제 완료: userId={}", userId);
+    }
+
+    // ========== 프로필 이미지 변경 ==========
+
+    @Transactional
+    public String updateProfileImage(Long userId, org.springframework.web.multipart.MultipartFile file) {
+        log.info("프로필 이미지 변경 요청: userId={}", userId);
+
+        User user = findById(userId);
+
+        // 기존 이미지가 있다면 삭제
+        if (user.getProfileImageUrl() != null) {
+            fileStorageService.deleteProfileImage(user.getProfileImageUrl());
+        }
+
+        // 새 이미지 저장
+        String filename = fileStorageService.storeProfileImage(file);
+
+        // 사용자 정보 업데이트
+        user.setProfileImageUrl(filename);
+        userRepository.save(user);
+
+        log.info("프로필 이미지 변경 완료: userId={}, filename={}", userId, filename);
+        return filename;
+    }
+
+    @Transactional
+    public void deleteProfileImage(Long userId) {
+        log.info("프로필 이미지 삭제 요청: userId={}", userId);
+
+        User user = findById(userId);
+
+        if (user.getProfileImageUrl() == null) {
+            throw new BusinessException(ResponseCode.BAD_REQUEST, "삭제할 프로필 이미지가 없습니다.");
+        }
+
+        // 이미지 파일 삭제
+        fileStorageService.deleteProfileImage(user.getProfileImageUrl());
+
+        // 사용자 정보 업데이트
+        user.setProfileImageUrl(null);
+        userRepository.save(user);
+
+        log.info("프로필 이미지 삭제 완료: userId={}", userId);
     }
 }
