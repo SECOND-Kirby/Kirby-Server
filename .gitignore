@@ -38,3 +38,7 @@ out/
 
 ### .env ###
 .env
+
+### Uploads ###
+/uploads/
+uploads/
