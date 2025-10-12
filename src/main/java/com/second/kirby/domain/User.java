@@ -34,6 +34,9 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String password;
 
+    @Column(name = "profile_image_url")
+    private String profileImageUrl;
+
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
 

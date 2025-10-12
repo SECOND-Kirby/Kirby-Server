@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "사용자", description = "사용자 정보 API")
 @RestController
@@ -34,7 +35,8 @@ public class UserController {
                 user.getUsername(),
                 user.getName(),
                 user.getEmail(),
-                user.getPhoneNumber()
+                user.getPhoneNumber(),
+                user.getProfileImageUrl()
         );
 
         return ResponseEntity.ok(ResponseDto.success(userInfo, "사용자 정보 조회 성공"));
@@ -66,6 +68,31 @@ public class UserController {
         return ResponseEntity.ok(ResponseDto.success("비밀번호가 변경되었습니다."));
     }
 
+    @Operation(summary = "프로필 이미지 변경", description = "사용자의 프로필 이미지를 변경합니다.")
+    @SecurityRequirement(name = "bearerAuth")
+    @PostMapping("/profile/image")
+    public ResponseEntity<ResponseDto<ProfileImageResponse>> updateProfileImage(
+            Authentication authentication,
+            @RequestParam("image") MultipartFile file) {
+
+        User user = userService.findByUsername(authentication.getName());
+        String filename = userService.updateProfileImage(user.getId(), file);
+
+        ProfileImageResponse response = new ProfileImageResponse(filename);
+        return ResponseEntity.ok(ResponseDto.success(response, "프로필 이미지가 변경되었습니다."));
+    }
+
+    @Operation(summary = "프로필 이미지 삭제", description = "사용자의 프로필 이미지를 삭제합니다.")
+    @SecurityRequirement(name = "bearerAuth")
+    @DeleteMapping("/profile/image")
+    public ResponseEntity<ResponseDto<Void>> deleteProfileImage(Authentication authentication) {
+
+        User user = userService.findByUsername(authentication.getName());
+        userService.deleteProfileImage(user.getId());
+
+        return ResponseEntity.ok(ResponseDto.success("프로필 이미지가 삭제되었습니다."));
+    }
+
     @Operation(summary = "회원 탈퇴", description = "현재 비밀번호 확인 후 모든 개인 데이터를 삭제하고 회원 탈퇴합니다.")
     @SecurityRequirement(name = "bearerAuth")
     @DeleteMapping("/me")
@@ -85,7 +112,14 @@ public class UserController {
             String username,
             String name,
             String email,
-            String phoneNumber
+            String phoneNumber,
+            String profileImageUrl
+    ) {
+    }
+
+    // 프로필 이미지 응답 DTO
+    public record ProfileImageResponse(
+            String filename
     ) {
     }
 }
