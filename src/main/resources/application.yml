@@ -24,8 +24,8 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET}
-  access-token-expire-time: ${JWT_ACCESS_EXPIRE_TIME:3600000}    # 1시간 (밀리초)
-  refresh-token-expire-time: ${JWT_REFRESH_EXPIRE_TIME:604800000} # 7일 (밀리초)
+  access-token-expire-time: ${JWT_ACCESS_EXPIRE_TIME:3600000}
+  refresh-token-expire-time: ${JWT_REFRESH_EXPIRE_TIME:604800000}
 
 robot:
   api:
@@ -34,13 +34,36 @@ robot:
     connection-timeout: 3000
     read-timeout: 5000
 
-logging:
-  level:
-    org.hibernate.SQL: WARN
-    org.springframework.scheduling: WARN
-
 file:
   storage:
     upload-dir: ./uploads
     profile-image-dir: profiles
     max-file-size: 5242880
+
+# ⭐ 여기부터 추가된 부분
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  metrics:
+    tags:
+      application: kirby
+      environment: production
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+
+logging:
+  file:
+    name: ./logs/application.log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  level:
+    org.hibernate.SQL: WARN
+    org.springframework.scheduling: WARN
+    com.second.kirby: INFO

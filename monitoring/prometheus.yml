@@ -1,0 +1,22 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # 로컬 개발용
+  - job_name: 'kirby-local'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+        labels:
+          environment: 'local'
+          application: 'kirby'
+
+  # AWS EC2 운영 서버용
+  - job_name: 'kirby-production'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['EC2_PUBLIC_IP:8080']  # 실제 EC2 Public IP로 변경
+        labels:
+          environment: 'production'
+          application: 'kirby'
