@@ -42,3 +42,12 @@ out/
 ### Uploads ###
 uploads/profiles/*
 !uploads/profiles/.gitkeep
+
+### Logs ###
+logs/
+*.log
+
+### Monitoring data ###
+monitoring/prometheus-data/
+monitoring/loki-data/
+monitoring/grafana-data/
