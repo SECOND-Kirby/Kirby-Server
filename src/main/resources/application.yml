@@ -40,7 +40,6 @@ file:
     profile-image-dir: profiles
     max-file-size: 5242880
 
-# ⭐ 여기부터 추가된 부분
 management:
   endpoints:
     web:
